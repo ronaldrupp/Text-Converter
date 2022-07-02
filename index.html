@@ -1,0 +1,103 @@
+<html lang="en">
+  <title>Prototype</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <script type="text/javascript">
+      function convert() {
+        var text = document.getElementById("url").value;
+        let paragraph = document.getElementById("converted_url");
+        paragraph.innerHTML = linkify(text);
+        navigator.permissions
+          .query({ name: "clipboard-write" })
+          .then((result) => {
+            if (result.state == "granted" || result.state == "prompt") {
+              console.log("Write access ranted!");
+              navigator.clipboard.writeText(text).then(() => {
+                // Alert the user that the action took place.
+                // Nobody likes hidden stuff being done under the hood!
+                console.log("Copied to clipboard");
+              });
+            }
+          });
+      }
+      function linkify(inputText) {
+        var replacedText,
+          replacePattern1,
+          replacePattern2,
+          replacePattern3,
+          replacePattern4,
+          replacePattern5;
+
+        //URLs starting with http://, https://, or ftp://
+        replacePattern1 =
+          /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+        replacedText = inputText.replace(
+          replacePattern1,
+          '<a href="$1" target="_blank">$1</a>'
+        );
+
+        //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+        replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+        replacedText = replacedText.replace(
+          replacePattern2,
+          '$1<a href="http://$2" target="_blank">$2</a>'
+        );
+
+        //Change email addresses to mailto:: links.
+        replacePattern3 =
+          /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+        replacedText = replacedText.replace(
+          replacePattern3,
+          '<a href="mailto:$1">$1</a>'
+        );
+
+        // replacePattern4 = /(\r\n|\r|\n)/gim;
+        // replacedText = replacedText.replace(replacePattern4, "<br>");
+
+        replacePattern5 = /(\u2022)/gim;
+        replacedText = replacedText.replace(replacePattern5, "</li><li>");
+
+        return replacedText;
+      }
+    </script>
+    <style>
+      html {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+      }
+      body {
+        max-width: 768px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        font-family: "Courier New", Courier, monospace;
+        margin-top: 20px;
+      }
+      input {
+        margin-top: 20px;
+        padding: 10px 40px;
+        border: none;
+        background-color: rgb(43, 215, 0);
+        color: white;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Text Converter</h1>
+    <textarea id="url" placeholder="Enter Some Text With Links or bullet points"> </textarea>
+    <input type="button" value="Convert" onclick="convert();" />
+
+    <textarea id="converted_url"></textarea>
+  </body>
+</html>
